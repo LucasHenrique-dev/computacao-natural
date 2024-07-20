@@ -38,7 +38,7 @@ class Visualizacao:
             return []
 
         ani = FuncAnimation(fig, update, frames=len(self.solutions), init_func=init, blit=True, repeat=False)
-        ani.save(f'computacao-natural/Animacoes/{file_name}.gif', writer=PillowWriter(fps=1))
+        ani.save(f'Animacoes/{file_name}.gif', writer=PillowWriter(fps=1))
 
     def identify_cities(self, ax):
         for i, coord in enumerate(self.coordinates):
@@ -55,7 +55,7 @@ class Visualizacao:
             proximo_coord_y = float(route_coordinates[i + 1][1])
             ax.arrow(atual_coord_x, atual_coord_y, proximo_coord_x - atual_coord_x,
                      proximo_coord_y - atual_coord_y,
-                     color=colors[vehicle_index % len(colors)], length_includes_head=True, head_width=1, width=0.2)
+                     color=colors[vehicle_index % len(colors)], length_includes_head=True, head_width=5, width=1)
         ax.plot(route_coordinates[:, 0], route_coordinates[:, 1],
                 color=colors[vehicle_index % len(colors)], marker='o', label=f'Veículo {vehicle_index + 1}')
         ax.legend()
@@ -115,6 +115,22 @@ class Visualizacao:
         plt.xlabel('Coordenada X')
         plt.ylabel('Coordenada Y')
         plt.title('Rotas dos Veículos')
+        plt.legend()
+        plt.grid()
+        plt.show()
+
+    def pareto_plot(self):
+        pareto_front = self.aco_vrp.best_pareto_front
+        obj1 = [value[0] for value in pareto_front]
+        obj2 = [value[1] for value in pareto_front]
+
+        plt.figure(figsize=(10, 8))
+
+        plt.scatter(obj1, obj2)
+
+        plt.xlabel('Distância (Km)')
+        plt.ylabel('Tempo (H)')
+        plt.title('Fronte de Pareto: Distância x Tempo')
         plt.legend()
         plt.grid()
         plt.show()
