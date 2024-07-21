@@ -77,25 +77,13 @@ class Visualizacao:
         plt.show()
 
     def plot_cities(self):
-        plt.figure(figsize=(10, 8))
-
-        # Plotando as cidades
-        for i, coord in enumerate(self.coordinates):
-            if i == 0:  # Destacar o ponto inicial
-                plt.scatter(coord[0], coord[1], s=100, c='green', marker='o')
-            else:
-                plt.scatter(coord[0], coord[1], c='blue', marker='o')
-            plt.text(coord[0], coord[1], f' {i} (D: {self.demand[i]})', fontsize=16, ha='right')
+        self.mark_cities()
 
         # Plotando as distâncias
         for i in range(len(self.coordinates)):
             for j in range(i + 1, len(self.coordinates)):
                 if self.distance_matrix[i][j] != 0:
-                    x_values = [self.coordinates[i][0], self.coordinates[j][0]]
-                    y_values = [self.coordinates[i][1], self.coordinates[j][1]]
-                    plt.plot(x_values, y_values, 'k--', alpha=0.5)
-                    mid_x = (self.coordinates[i][0] + self.coordinates[j][0]) / 2
-                    mid_y = (self.coordinates[i][1] + self.coordinates[j][1]) / 2
+                    mid_x, mid_y = self.calc_distance(i, j)
                     plt.text(mid_x, mid_y, f'{self.distance_matrix[i][j]:.1f}', fontsize=16, ha='center', va='center')
 
         plt.xlabel('Coordenada X')
@@ -104,11 +92,62 @@ class Visualizacao:
         plt.grid()
         plt.show()
 
+    def calc_distance(self, i, j):
+        x_values = [self.coordinates[i][0], self.coordinates[j][0]]
+        y_values = [self.coordinates[i][1], self.coordinates[j][1]]
+        plt.plot(x_values, y_values, 'k--', alpha=0.5)
+        mid_x = (self.coordinates[i][0] + self.coordinates[j][0]) / 2
+        mid_y = (self.coordinates[i][1] + self.coordinates[j][1]) / 2
+        return mid_x, mid_y
+
+    def plot_cities_time(self):
+        self.mark_cities()
+
+        # Plotando as distâncias
+        for i in range(len(self.coordinates)):
+            for j in range(i + 1, len(self.coordinates)):
+                if self.distance_matrix[i][j] != 0:
+                    mid_x, mid_y = self.calc_distance(i, j)
+                    time = self.routes.time_matrix[i][j]
+                    plt.text(mid_x, mid_y, f'{self.distance_matrix[i][j]:.1f}; {time}', fontsize=16,
+                             ha='center', va='center')
+
+        plt.xlabel('Coordenada X')
+        plt.ylabel('Coordenada Y')
+        plt.title('Visualização das Cidades com Distâncias e Demandas')
+        plt.grid()
+        plt.show()
+
+    def mark_cities(self):
+        plt.figure(figsize=(10, 8))
+        # Plotando as cidades
+        for i, coord in enumerate(self.coordinates):
+            if i == 0:  # Destacar o ponto inicial
+                plt.scatter(coord[0], coord[1], s=100, c='green', marker='o')
+            else:
+                plt.scatter(coord[0], coord[1], c='blue', marker='o')
+            plt.text(coord[0], coord[1], f' {i} (D: {self.demand[i]})', fontsize=16, ha='right')
+
     def plot_solution(self):
         colors = ["blue", "green", "red", "cyan", "magenta", "yellow", "black"]
 
         plt.figure(figsize=(10, 8))
         for vehicle_index, route in enumerate(self.best_solution):
+            self.plot_vectors(plt, colors, route, vehicle_index)
+        self.identify_cities(plt)
+
+        plt.xlabel('Coordenada X')
+        plt.ylabel('Coordenada Y')
+        plt.title('Rotas dos Veículos')
+        plt.legend()
+        plt.grid()
+        plt.show()
+
+    def plot_solution_index(self, index):
+        colors = ["blue", "green", "red", "cyan", "magenta", "yellow", "black"]
+
+        plt.figure(figsize=(10, 8))
+        for vehicle_index, route in enumerate(self.best_solution[index]):
             self.plot_vectors(plt, colors, route, vehicle_index)
         self.identify_cities(plt)
 
@@ -131,6 +170,5 @@ class Visualizacao:
         plt.xlabel('Distância (Km)')
         plt.ylabel('Tempo (H)')
         plt.title('Fronte de Pareto: Distância x Tempo')
-        plt.legend()
         plt.grid()
         plt.show()

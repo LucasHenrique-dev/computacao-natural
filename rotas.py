@@ -71,20 +71,7 @@ class Route_Time(Route):
                  max_deposit_coord=50, min_coord_factor=-5, max_coord_factor=5, min_time=1, max_time=5):
         super().__init__(num_cities, capacity, min_capacity_factor, max_capacity_factor, min_deposit_coord,
                          max_deposit_coord, min_coord_factor, max_coord_factor)
-        self.num_cities = num_cities
-        self.capacity = capacity
-        self.coordinates = []
-        self.demand = []
-        self.distance_matrix = []
-        self.time_matrix = []
-        self.min_deposit_coord = min_deposit_coord
-        self.max_deposit_coord = max_deposit_coord
-        self.min_coord_factor = min_coord_factor
-        self.max_coord_factor = max_coord_factor
-        self.min_capacity_factor = min_capacity_factor
-        self.max_capacity_factor = max_capacity_factor
-        self.min_demand = capacity * min_capacity_factor
-        self.max_demand = capacity * max_capacity_factor
+        self.time_matrix = np.zeros((self.num_cities, self.num_cities), dtype=int)
         self.min_time = min_time
         self.max_time = max_time
 
@@ -95,8 +82,15 @@ class Route_Time(Route):
         self.add_time()
 
     def add_time(self):
-        self.time_matrix = np.random.randint(self.min_time, self.max_time, size=(self.num_cities, self.num_cities))
-        self.time_matrix[np.diag_indices(self.num_cities)] = 0
+        # Preencher apenas a metade superior da matriz (excluindo a diagonal)
+        for i in range(self.num_cities):
+            for j in range(i + 1, self.num_cities):
+                time_value = np.random.randint(self.min_time, self.max_time)
+                self.time_matrix[i][j] = time_value
+                self.time_matrix[j][i] = time_value
+
+        # A diagonal deve ser zero
+        np.fill_diagonal(self.time_matrix, 0)
 
     def get_time_matrix(self):
         return self.time_matrix
@@ -106,18 +100,18 @@ if __name__ == '__main__':
     # DISTÂNCIAS
     print("APENAS DISTÂNCIAS")
     route = Route(10, 100)
-    coord, demand, matrix_distances = route.create_routes()
-    print(coord)
-    print(demand)
-    print(matrix_distances)
+    route.create_routes()
+    print(route.get_coordinates())
+    print(route.get_demand())
+    print(route.get_distance_matrix())
 
     print(f"\n{'-='*100}\n")
 
     # DISTÂNCIAS E TEMPO
     print("DISTÂNCIAS E TEMPO")
     route = Route_Time(10, 100)
-    coord, demand, matrix_distances, matrix_time = route.create_routes()
-    print(coord)
-    print(demand)
-    print(matrix_distances)
-    print(matrix_time)
+    route.create_routes()
+    print(route.get_coordinates())
+    print(route.get_demand())
+    print(route.get_distance_matrix())
+    print(route.get_time_matrix())
