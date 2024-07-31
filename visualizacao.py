@@ -2,17 +2,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.animation import FuncAnimation, PillowWriter
 
+from aco import MO_ACO_VRPT
+
 
 class Visualizacao:
-    def __init__(self, routes, aco_vrp):
+    def __init__(self, routes, solution=None, aco_vrp=None):
         self.routes = routes
-        self.aco_vrp = aco_vrp
         self.coordinates = routes.coordinates
         self.demand = routes.demand
         self.distance_matrix = routes.distance_matrix
-        self.best_solution = aco_vrp.best_solution
-        self.solutions = aco_vrp.history["solution"]
-        self.hist_costs = aco_vrp.history["cost"]
+        if aco_vrp is not None:
+            if isinstance(aco_vrp, MO_ACO_VRPT):
+                self.pareto_front = aco_vrp.best_pareto_front
+            self.best_solution = aco_vrp.best_solution
+            self.solutions = aco_vrp.history["solution"]
+            self.hist_costs = aco_vrp.history["cost"]
+        else:
+            self.best_solution = solution
 
     def exibir_iteracoes_animado(self, file_name):
         colors = ["blue", "green", "red", "cyan", "magenta", "yellow", "black"]
@@ -159,9 +165,8 @@ class Visualizacao:
         plt.show()
 
     def pareto_plot(self):
-        pareto_front = self.aco_vrp.best_pareto_front
-        obj1 = [value[0] for value in pareto_front]
-        obj2 = [value[1] for value in pareto_front]
+        obj1 = [value[0] for value in self.pareto_front]
+        obj2 = [value[1] for value in self.pareto_front]
 
         plt.figure(figsize=(10, 8))
 
@@ -171,4 +176,27 @@ class Visualizacao:
         plt.ylabel('Tempo (H)')
         plt.title('Fronte de Pareto: Distância x Tempo')
         plt.grid()
+        plt.show()
+
+    def plot_single_solution(self, ax, solution, title, colors):
+        for vehicle_index, route in enumerate(solution):
+            self.plot_vectors(ax, colors, route, vehicle_index)
+        self.identify_cities(ax)
+        ax.set_xlabel('Coordenada X')
+        ax.set_ylabel('Coordenada Y')
+        ax.set_title(title)
+        ax.legend()
+        ax.grid()
+
+    def comparar_graficos(self, solution1, solution2, titulo1="Gráfico 1", titulo2="Gráfico 2"):
+        colors = ["blue", "green", "red", "cyan", "magenta", "yellow", "black"]
+
+        fig, axs = plt.subplots(1, 2, figsize=(20, 8))
+
+        # Plot do primeiro gráfico
+        self.plot_single_solution(axs[0], solution1, titulo1, colors)
+
+        # Plot do segundo gráfico
+        self.plot_single_solution(axs[1], solution2, titulo2, colors)
+
         plt.show()

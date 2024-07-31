@@ -21,7 +21,7 @@ class Route:
     def create_routes(self):
         self.add_city()
         self.add_demand()
-        self.add_distance()
+        self.add_distance_manhattan()  # Euclidean OR Manhattan
 
     def add_city(self):
         # Coordenadas do Depósito
@@ -34,7 +34,7 @@ class Route:
             factor_x = np.random.uniform(self.min_coord_factor, self.max_coord_factor)
             factor_y = np.random.uniform(self.min_coord_factor, self.max_coord_factor)
 
-            coordinates = tuple((np.int32(deposito_x*factor_x), np.int32((deposito_y*factor_y))))
+            coordinates = tuple((np.int32(deposito_x*factor_x)+deposito_x, np.int32((deposito_y*factor_y)))+deposito_y)
 
             if tuple(coordinates) not in set(self.coordinates):
                 self.coordinates.append(coordinates)
@@ -46,13 +46,23 @@ class Route:
         # Demanda das Cidades
         self.demand[1:] = np.random.randint(self.min_demand, self.max_demand, size=self.num_cities - 1)
 
-    def add_distance(self):
+    def add_distance_euclidean(self):
         for i in range(self.num_cities):
             distances = []
             for j in range(self.num_cities):
                 diff_x = self.coordinates[i][0] - self.coordinates[j][0]
                 diff_y = self.coordinates[i][1] - self.coordinates[j][1]
                 distances.append(np.sqrt(diff_x ** 2 + diff_y ** 2))
+
+            self.distance_matrix.append(distances)
+
+    def add_distance_manhattan(self):
+        for i in range(self.num_cities):
+            pos_x1, pos_y1 = self.coordinates[i][0], self.coordinates[i][1]
+            distances = []
+            for j in range(self.num_cities):
+                pos_x2, pos_y2 = self.coordinates[j][0], self.coordinates[j][1]
+                distances.append(abs(pos_x1 - pos_x2) + abs(pos_y1 - pos_y2))
 
             self.distance_matrix.append(distances)
 
@@ -78,7 +88,7 @@ class Route_Time(Route):
     def create_routes(self):
         self.add_city()
         self.add_demand()
-        self.add_distance()
+        self.add_distance_manhattan()  # Euclidean OR Manhattan
         self.add_time()
 
     def add_time(self):

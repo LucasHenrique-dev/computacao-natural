@@ -4,7 +4,7 @@ import numpy as np
 class ACO_VRP:
     def __init__(self, routes, vehicle_capacity, num_ants, num_iterations, alpha=1.0, beta=2.0, rho=0.5, Q=10,
                  max_stagnation=5):
-        routes.create_routes()
+        self.routes = routes
         self.vehicle_capacity = vehicle_capacity
         self.demand = routes.get_demand()
         self.distance_matrix = routes.get_distance_matrix()
@@ -184,7 +184,6 @@ class MO_ACO_VRPT(ACO_VRP):
     def __init__(self, routes, vehicle_capacity, num_ants, num_iterations, alpha=1.0, beta=2.0, rho=0.5, Q=10,
                  max_stagnation=5):
         super().__init__(routes, vehicle_capacity, num_ants, num_iterations, alpha, beta, rho, Q, max_stagnation)
-        routes.add_time()
         self.time_matrix = routes.get_time_matrix()
         self.num_vehicles = int(np.ceil(sum(self.demand)/self.vehicle_capacity))
         self.best_pareto_front = []
